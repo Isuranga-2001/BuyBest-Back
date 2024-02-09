@@ -20,7 +20,7 @@ def get_body_content(base):
 def findAllUrls(base):
     reqs = requests.get(base)
     soup = BeautifulSoup(reqs.text, 'html.parser')
-
+    arr = []
     ln = len(baseUrl) - 1
 
     f = open("urls.txt", "w")
@@ -39,8 +39,6 @@ def findAllUrls(base):
     f.close()
     return arr
 
-
-findAllUrls(url)
 
 
 

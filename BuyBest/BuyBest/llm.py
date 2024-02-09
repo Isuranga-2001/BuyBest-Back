@@ -12,35 +12,56 @@ import os
 from langchain.chat_models import ChatOpenAI
 
 load_dotenv()
-url = 'https://www.laptop.lk/'
+url = 'https://www.laptop.lk/index.php/product-category/laptops-desktops/'
 
-arr = findAllUrls(url)
+url_arr = findAllUrls(url)
+
+websitedata = []
+
+def save_web_data():
+    for pagedata in url_arr:
+        websitedata.append(get_body_content(pagedata).strip())
+    print(websitedata)
+    return websitedata
 
 
-def save_page_data(page_url, content):
+def save_website_data_to_pickle(webcontent):
     text_split = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
             length_function=len
         )
-    chunks = text_split.split_text()
+    chunks = text_split.split_text(text=webcontent.decode("utf-8"))
     embeddings = OpenAIEmbeddings()
     vs = FAISS.from_texts(chunks,embedding=embeddings)
     try:
-        with open(f"{page_url}.pkl", "wb") as f:
+        with open(f"{url}.pkl", "wb") as f:
             pickle.dump(vs, f)
-            print(f"Saved {page_url} to disk.")
-
+            print(f"Saved {url} to disk.")
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
     
-def get_recommendations(vs):
-    user_query = input("Enter your query: ")
-    docs = vs.similarity_search(query=user_query)
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo")
-    chain = load_qa_chain(llm=llm, chain_type="stuff")
-    with get_openai_callback() as callback:
-        response = chain.run(input_documents=docs, question=user_query)
-    
+def get_recommendations():
+    try:
+        if os.path.exists(f"{url}.pkl"):
+            with open(f"{url}.pkl", "rb") as f:
+                vs = pickle.load(f)
+                print(f"Loaded {url} from disk.")
+        else:
+            print("No data found.")
 
+        user_query = input("Enter your query: ")
+        docs = vs.similarity_search(query=user_query)
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo")
+        chain = load_qa_chain(llm=llm, chain_type="stuff")
+        with get_openai_callback() as callback:
+            response = chain.run(input_documents=docs, question=user_query)
+            print(response)
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+
+save_website_data_to_pickle(save_web_data())
