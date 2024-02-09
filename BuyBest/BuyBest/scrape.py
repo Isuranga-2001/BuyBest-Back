@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-url = 'https://www.laptop.lk/index.php/product-category/laptops-desktops/laptop-dell/'  # Replace with the target website URL
+url = 'https://www.laptop.lk/index.php/product-category/laptops-desktops/'
 baseUrl = "https://www.laptop.lk/index.php/product/"
 arr = []
 
@@ -37,6 +37,7 @@ def findAllUrls(base):
             continue
 
     f.close()
+    return arr
 
 
 findAllUrls(url)
