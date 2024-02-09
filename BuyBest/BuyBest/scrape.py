@@ -1,11 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
-import mimetypes
 
-url = 'https://www.laptop.lk/index.php/product-category/'  # Replace with the target website URL
+url = 'https://www.laptop.lk/index.php/product-category/laptops-desktops/laptop-dell/'  # Replace with the target website URL
+baseUrl = "https://www.laptop.lk/index.php/product/"
 arr = []
-
-f = open("urls.txt", "a")
 
 
 def get_body_content(base):
@@ -19,35 +17,38 @@ def get_body_content(base):
         return None
 
 
-def is_html(base):
-    try:
-        response = requests.get(base)
-        content_type = response.headers['Content-Type']
-        return True
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return False
-
-
 def findAllUrls(base):
     reqs = requests.get(base)
     soup = BeautifulSoup(reqs.text, 'html.parser')
 
-    ln = len(base) - 1
+    ln = len(baseUrl) - 1
+
+    f = open("urls.txt", "w")
 
     for link in soup.find_all('a'):
         sublink = link.get('href')
         try:
-            if sublink[0:ln + 1] == base:
-                if is_html(base):
-                    f.append(sublink + '\n')
-                    if sublink not in arr:
-                        arr.append(sublink)
-                else:
-                    findAllUrls(sublink)
+            if sublink[0:ln + 1] == baseUrl:
+                f.writelines(sublink + '\n')
+                if sublink not in arr:
+                    arr.append(sublink)
+
         except:
             continue
 
+    f.close()
+
 
 findAllUrls(url)
-f.close()
+
+
+
+count = 5
+
+# scan bu body tag
+for i in arr:
+    count -= 1
+    if count == 0:
+        break
+    print(get_body_content(i).strip())
+    print("\n")
