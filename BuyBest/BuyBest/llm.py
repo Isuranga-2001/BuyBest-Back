@@ -25,13 +25,27 @@ def save_web_data():
     return websitedata
 
 
+
+
+
+
 def save_website_data_to_pickle(webcontent):
     text_split = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
             length_function=len
         )
-    chunks = text_split.split_text(text=webcontent.decode("utf-8"))
+
+    text_list = []
+    for element in webcontent:
+        if isinstance(element, bytes):
+            text = element.decode('utf-8')
+        else:
+            text = bytes(element, 'utf-8').decode('utf-8')
+        text_list.append(text)
+    chunks = text_split.split_text(text=text_list[0])
+
+    #chunks = text_split.split_text(text=webcontent[0].encode("utf-8"))
     embeddings = OpenAIEmbeddings()
     vs = FAISS.from_texts(chunks,embedding=embeddings)
     try:
